@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: Add series
+title: Adding series
 categories: [blog]
 tags: [jekyll]
 published: true
