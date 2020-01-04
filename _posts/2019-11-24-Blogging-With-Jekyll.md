@@ -2,6 +2,8 @@
 layout: post
 comments: true
 title: You're up and running!
+feature-img: "assets/img/pexels/book-glass.jpeg"    # Add a feature-image to the post
+thumbnail: "assets/img/thumbnail/desk-messy.jpeg"   # Add a thumbnail image on blog view
 categories: [blog]
 tags: [jekyll]
 ---
