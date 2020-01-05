@@ -6,7 +6,12 @@ feature-img: "assets/img/pexels/book-glass.jpeg"    # Add a feature-image to the
 #thumbnail: "assets/img/thumbnail/desk-messy.jpeg"   # Add a thumbnail image on blog view
 categories: [blog]
 tags: [jekyll]
+series: "Blogging with Jekyll"
 ---
+
+## About this series 
+{% include series.html %}
+----
 
 Next you can update your site name, avatar and other options using the _config.yml file in the root of your repository (shown below).
 

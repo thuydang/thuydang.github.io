@@ -8,8 +8,11 @@ published: true
 series: "Blogging with Jekyll"
 ---
 
-## Build the blog
+## About this series 
 {% include series.html %}
+----
+
+## Build the blog
 
 
 ### Related totorials
