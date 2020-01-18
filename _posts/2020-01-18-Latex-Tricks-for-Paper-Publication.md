@@ -7,9 +7,11 @@ feature-img: "assets/img/pexels/book-glass.jpeg"    # Add a feature-image to the
 categories: [research]
 tags: [latex, publication]
 #series: "Blogging with Jekyll"
-# Note: include series header in page body {% include series.html %}
 ---
 
+{% comment %}
+# Note: include series header in page body {% include series.html %}
+{% endcomment %}
 
 For the first time I got these errors from EDAS paper submission platform for conferences. I could get the paper checking passed and note the tricks in this post.
 
@@ -18,13 +20,10 @@ For the first time I got these errors from EDAS paper submission platform for co
 2. pdf	gutter	The gutter between columns is 0.01 inches wide (on page 3), but should be at least 0.12 inches.	-
 ```
 
-Number 1 is wierd because the paper obviously has 2 columns. But fixing the 2. error will also solve it.
+The 2. error is probably causes by a figure across 2 column as suggested by [1](https://www.cnblogs.com/quinn-yann/p/11279801.html). It is solved by adding a minipage. My previous submissions did not have any problem. 
 
-The 2. error is propably causes by a figure across 2 column as suggested by [1](https://www.cnblogs.com/quinn-yann/p/11279801.html). It is solved by adding a minipage. My previous submissions did not have any problem. 
-
-{% raw %}
-````
-\begin{figure*}[th!]
+``` latex
+\begin{figure}[th!]
   \centering
   \begin{minipage}[t]{\linewidth}    <----------- Add this
     \includegraphics[width=0.90\textwidth,height=5.9cm]{images/arche_overview}
@@ -32,11 +31,11 @@ The 2. error is propably causes by a figure across 2 column as suggested by [1](
 \label{fig:multi_domain_arche}
 %\parbox{6.5cm}{\small \hspace{1.5cm} }
 \end{minipage}                  <---------- Add this
-\end{figure*}
-````
-{% endraw %}
+\end{figure}
+```
 
-After fixing the figure, the 2. error still existed but at another place (as expected!), which was most likly caused by a table on the right column. It seemed the table's hline(s) expanded to the column space. Fortunately the table fited in a single colums so centering it solved the issues. 
+
+After fixing the figure, the 2. error still existed but at another place (as expected!), which was most likely caused by a table on the right column. It seemed the table's hline(s) expanded to the column space. Fortunately the table fitted in a single column so centering it solved the issues. 
 
 ``` latex
 \begin{table}
