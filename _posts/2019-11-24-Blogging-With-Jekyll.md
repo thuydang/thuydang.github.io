@@ -57,7 +57,7 @@ The indicated line points to line 7 of the following snippet, which seems fine.
 To debug, a local ruby jekyll environment is installed. 
 
 1. Install Jekyll and plug-ins in one fell swoop. gem install github-pages This mirrors the plug-ins used by GitHub Pages on your local machine including Jekyll, Sass, etc. `ruby-devel` and etc. may be required.
-2. Clone down your fork `git clone https://github.com/yourusername/yourusername.github.io.git`.   
+2. Fork and clone the [Type on Strap repo](https://github.com/sylhare/Type-On-Strap): `git clone https://github.com/Sylhare/Type-on-Strap.git`
 3. Serve the site and watch for markup/sass changes `jekyll serve`.
 4. View your website at <http://127.0.0.1:4000/>.
 5. Commit any changes and push everything to the master branch of your GitHub user repository. GitHub Pages will then rebuild and serve your website.
