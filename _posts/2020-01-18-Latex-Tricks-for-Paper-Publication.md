@@ -10,8 +10,6 @@ tags: [latex, publication]
 # Note: include series header in page body {% include series.html %}
 ---
 
-## About this series 
-----
 
 For the first time I got these errors from EDAS paper submission platform for conferences. I could get the paper checking passed and note the tricks in this post.
 
@@ -24,7 +22,8 @@ Number 1 is wierd because the paper obviously has 2 columns. But fixing the 2. e
 
 The 2. error is propably causes by a figure across 2 column as suggested by [1](https://www.cnblogs.com/quinn-yann/p/11279801.html). It is solved by adding a minipage. My previous submissions did not have any problem. 
 
-``` latex
+{% raw %}
+````
 \begin{figure*}[th!]
   \centering
   \begin{minipage}[t]{\linewidth}    <----------- Add this
@@ -34,7 +33,8 @@ The 2. error is propably causes by a figure across 2 column as suggested by [1](
 %\parbox{6.5cm}{\small \hspace{1.5cm} }
 \end{minipage}                  <---------- Add this
 \end{figure*}
-```
+````
+{% endraw %}
 
 After fixing the figure, the 2. error still existed but at another place (as expected!), which was most likly caused by a table on the right column. It seemed the table's hline(s) expanded to the column space. Fortunately the table fited in a single colums so centering it solved the issues. 
 
