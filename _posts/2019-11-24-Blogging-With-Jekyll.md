@@ -61,7 +61,10 @@ To debug, a local ruby jekyll environment is installed.
 
 **Solution:**
 
-1. Remove all indication of language highlight, just keep the fence block. OR 
+1. Remove all indication of language highlight, just keep the fence block. Compile pages. Add programming language to the fence block. It works magically!!!
+
+OR 
+
 2. Wrap the code around hightlight - endhighlight tags. Now language and linenos (line number) can be set.
 
 ~~~
