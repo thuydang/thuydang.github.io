@@ -28,7 +28,7 @@ The 2. error is probably causes by a figure across 2 column as suggested by [1](
   \centering
   \begin{minipage}[t]{\linewidth}    <----------- Add this
     \includegraphics[width=0.90\textwidth,height=5.9cm]{images/arche_overview}
-  \caption{Multi-domain network slicing management architectures: federated (left), brokering (right). The dotted arrows show stakeholder-neutral communication and the solid arrows show operator specific network protocols}
+  \caption{Multi-domain network slicing management architectures}
 \label{fig:multi_domain_arche}
 %\parbox{6.5cm}{\small \hspace{1.5cm} }
 \end{minipage}                  <---------- Add this
@@ -97,5 +97,5 @@ Sometimes EDAS or some other pdf checking tools give strange errors. Most answer
 
 ## References 
 
-1. https://www.cnblogs.com/quinn-yann/p/11279801.html
-2. https://www.egr.msu.edu/~renjian/latex.htm
+1. <https://www.cnblogs.com/quinn-yann/p/11279801.html>
+2. <https://www.egr.msu.edu/~renjian/latex.htm>
