@@ -22,18 +22,6 @@ For the first time I got these errors from EDAS paper submission platform for co
 
 The 2. error is probably causes by a figure across 2 column as suggested by [1](https://www.cnblogs.com/quinn-yann/p/11279801.html). It is solved by adding a minipage. My previous submissions did not have any problem. 
 
-``` latex
-\begin{figure}[th!]
-  \centering
-  \begin{minipage}[t]{\linewidth}    <----------- Add this
-    \includegraphics[width=0.90\textwidth,height=5.9cm]{images/arche_overview}
-  \caption{Multi-domain network slicing management architectures: federated (left), brokering (right). The dotted arrows show stakeholder-neutral communication and the solid arrows show operator specific network protocols}
-\label{fig:multi_domain_arche}
-%\parbox{6.5cm}{\small \hspace{1.5cm} }
-\end{minipage}                  <---------- Add this
-\end{figure}
-```
-
 
 After fixing the figure, the 2. error still existed but at another place (as expected!), which was most likely caused by a table on the right column. It seemed the table's hline(s) expanded to the column space. Fortunately the table fitted in a single column so centering it solved the issues. 
 
