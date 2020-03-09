@@ -31,7 +31,14 @@ Before getting started, we need to define some terminology:
 
 ## Node installation
 
-* On managed nodes, configure with a user account, privilege escalation, and SSH public key authentication.
+* On managed nodes, configure with a user account, privilege escalation, set NOPASSWD for sudo user, and SSH public key authentication.
+
+```
+$ ssh admin@tb-h1 mkdir -p .ssh
+$ cat ./keys/id_rsa.pub|ssh admin@tb-h1 'cat >> .ssh/authorized_keys'
+$ ssh admin@tb-h1
+```
+
 * On control node, install ansible:
     dnf install -y ansible
     ansible --version
@@ -73,7 +80,7 @@ tb-h1
 [computes]
 tb-h2
 ```
-We specify username and ssh private keys to access the remote hosts. More options [here](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#non-ssh-connection-types).
+We specify username and ssh private keys to access the remote hosts. If sudo password is required, it must be set with `ansible_become_password` parameter. More options [here](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#non-ssh-connection-types).
 
 Let's check the inventory:
     $ ansible all --list-hosts
@@ -97,10 +104,56 @@ Now we will use ansible and some modules to configure the managed nodes.
 
 ## Configure managed nodes
 
+Run a command on all nodes:
+    $ ansible -m command -a "ls" all
+
+We copy the vimrc file to all managed nodes using ansible copy module:
+    ansible all -m copy -a 'src=../util/etc/vim/vimrc dest=/etc/ owner=root group=root mode=0644' -b
+
+The -b option (see <http://docs.ansible.com/ansible/latest/become.html>) causes the remote task to use privilege escalation (i.e. sudo) which is required to copy files into the /etc directory
+
+## Playbook
+
+While ad-hoc commands are useful for testing and simple one-off tasks, playbooks can be used to capture a set of repeatable tasks to run in the future. A playbook contains one or more **plays** which define a set of hosts to configure and a list of **tasks** to be performed.
+
+Create a `playbooks` folder and a playbook:
+    mkdir playbooks
+    vim home-lab.yaml
+
+Defining the first tasks:
+```
+---
+- hosts: all
+  tasks:
+    - name: list files in folder
+      command: ls
+```
+
+Playbooks are text files in YAML format. You can learn more about YAML formatting [here](http://docs.ansible.com/ansible/latest/YAMLSyntax.html).
+
+Execute the playbook:
+    $ ansible-playbook playbooks/home-lab.yaml
+
+## Useful tricks with playbooks
+
+Before running a playbook, you can check the syntax using:
+
+    $ ansible-playbook --syntax-check myplaybook.yml
+
+You can test a playbook without actually making any changes to the target hosts:
+    $ ansible-playbook --check myplaybook.yml
+
+Stepping through a playbook may also be useful:
+    $ ansible-playbook --step myplaybook.yml
+
+Similar to a shell script, you can make your Ansible playbook executable and add the following to the top of the file:
+    #!/bin/ansible-playbook
+
+
 ## References
 1. <https://www.redhat.com/en/blog/system-administrators-guide-getting-started-ansible-fast?extIdCarryOver=true&sc_cid=701f2000001OH7YAAW>
 2. <https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#non-ssh-connection-types>
-
+3. <https://docs.ansible.com/ansible/latest/user_guide/playbooks_intro.html#hosts-and-users>
 ----
 
 This is a demo of all styled elements in Jekyll Now.
