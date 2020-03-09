@@ -1,0 +1,156 @@
+---
+layout: post
+title: OpenStack lab Ansible control node
+categories: [blog, howto]
+tags: [lab, ansible]
+comments:true
+series: "Cloud lab with OpenStack"
+---
+
+In this series we will walk through the setup of a small OpenStack lab.
+
+In this article we will setup an Ansible control node.
+
+## Basic Ansible concepts
+
+Before getting started, we need to define some terminology:
+
+**Control node:** the host on which you use Ansible to execute tasks on the managed nodes
+
+**Managed node:** a host that is configured by the control node
+
+**Host inventory:** a list of managed nodes
+
+**Ad-hoc command:** a simple one-off task
+
+**Playbook:** a set of repeatable tasks for more complex configurations
+
+**Module:** code that performs a particular common task such as adding a user, installing a package, etc.
+
+**Idempotency:** an operation is idempotent if the result of performing it once is exactly the same as the result of performing it repeatedly without any intervening actions
+
+## Node installation
+
+* On managed nodes, configure with a user account, privilege escalation, and SSH public key authentication.
+* On control node, install ansible:
+    dnf install -y ansible
+    ansible --version
+* On control node, checkout the files lated to the test bed to a specific folder.
+    git clone git@github.com:thuydang/cloud-lab-controller-template.git -b home-lab
+
+## Configure Ansible on control node
+We will configure an Ansible configuration file and an inventory file.
+
+### Ansible configuration
+As we have just discovered, the default configuration file is /etc/ansible/ansible.cfg
+
+You can modify this global configuration file or make a copy specific to a particular directory. The order in which a configuration file is located is as follows:
+
+1. ANSIBLE_CONFIG (environment variable)
+2. ansible.cfg (per directory)
+3. ~/.ansible.cfg (home directory)
+4. /etc/ansible/ansible.cfg (global)
+
+As we have a directory for each lab, we will put the configuration file in a specific directory:
+```
+cat << EOF >> ./home-lab/ansible/ansible.cfg
+[defaults]
+inventory = ./hosts
+EOF
+```
+
+### Inventory 
+As configured the host inventory file is `hosts` located in the same folder as the `ansible.cfg` config file. The default host inventory file is /etc/ansible/hosts but can be changed via the configuration file (as shown above) or by using the -i option on the ansible command. We will be using a simple static inventory file. Dynamic inventories are also possible.
+
+```
+[all]
+tb-h1		ansible_user=admin ansible_ssh_private_key_file=../keys/id_rsa
+tb-h2		ansible_user=admin ansible_ssh_private_key_file=../keys/id_rsa
+
+[controllers]
+tb-h1
+
+[computes]
+tb-h2
+```
+We specify username and ssh private keys to access the remote hosts. More options [here](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#non-ssh-connection-types).
+
+Let's check the inventory:
+    $ ansible all --list-hosts
+    hosts (2):
+      tb-h1
+      tb-h2
+    $ ansible computes --list-hosts
+
+Ping all host to make sure all our hosts are up and running. We will do this using an ad-hoc command that uses the ping module:
+
+    $ ansible all -m ping
+
+You can obtain a list of available modules using:
+    $ ansible-doc -l
+
+You can find out what arguments a module, e.g., `copy` module, requires using:
+
+    $ ansible-doc copy
+
+Now we will use ansible and some modules to configure the managed nodes.
+
+## Configure managed nodes
+
+## References
+1. <https://www.redhat.com/en/blog/system-administrators-guide-getting-started-ansible-fast?extIdCarryOver=true&sc_cid=701f2000001OH7YAAW>
+2. <https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#non-ssh-connection-types>
+
+----
+
+This is a demo of all styled elements in Jekyll Now.
+
+[View the markdown used to create this post](https://raw.githubusercontent.com/barryclark/www.jekyllnow.com/gh-pages/_posts/2014-6-19-Markdown-Style-Guide.md).
+
+This is a paragraph, it's surrounded by whitespace. Next up are some headers, they're heavily influenced by GitHub's markdown style.
+
+## Header 2 (H1 is reserved for post titles)##
+
+### Header 3
+
+#### Header 4
+
+A link to [Jekyll Now](http://github.com/barryclark/jekyll-now/). A big ass literal link <http://github.com/barryclark/jekyll-now/>
+
+An image, located within /images
+
+![an image alt text]({{ site.baseurl }}/images/jekyll-logo.png "an image title")
+
+* A bulletted list
+- alternative syntax 1
++ alternative syntax 2
+  - an indented list item
+
+1. An
+2. ordered
+3. list
+
+Inline markup styles:
+
+- _italics_
+- **bold**
+- `code()`
+
+> Blockquote
+>> Nested Blockquote
+
+Syntax highlighting can be used with triple backticks, like so:
+
+```javascript
+/* Some pointless Javascript */
+var rawr = ["r", "a", "w", "r"];
+```
+
+Use two trailing spaces  
+on the right  
+to create linebreak tags  
+
+Finally, horizontal lines
+
+----
+****
