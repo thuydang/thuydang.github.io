@@ -4,6 +4,7 @@ title: OpenStack lab Ansible control node
 categories: [blog, howto]
 tags: [lab, ansible]
 comments: true
+published: true # required by series?
 series: "Cloud lab with OpenStack"
 ---
 
@@ -42,7 +43,8 @@ $ ssh admin@tb-h1
 * On control node, install ansible:
     dnf install -y ansible
     ansible --version
-* On control node, checkout the files lated to the test bed to a specific folder.
+* On control node, checkout the files lated to the test bed to a specific folder:
+
     git clone git@github.com:thuydang/cloud-lab-controller-template.git -b home-lab
 
 ## Configure Ansible on control node
