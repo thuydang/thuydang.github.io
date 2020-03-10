@@ -3,7 +3,7 @@ layout: post
 title: OpenStack lab Ansible control node
 categories: [blog, howto]
 tags: [lab, ansible]
-comments:true
+comments: true
 series: "Cloud lab with OpenStack"
 ---
 
