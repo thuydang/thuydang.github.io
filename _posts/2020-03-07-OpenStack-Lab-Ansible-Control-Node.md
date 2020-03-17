@@ -104,6 +104,61 @@ You can find out what arguments a module, e.g., `copy` module, requires using:
 
 Now we will use ansible and some modules to configure the managed nodes.
 
+### Defining variables
+
+TODO <https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#defining-variables-in-inventory>
+
+#### Host variables
+
+You can easily assign a variable to a single host, then use it later in playbooks. In INI:
+
+'''
+[atlanta]
+host1 http_port=80 maxRequestsPerChild=808
+host2 http_port=303 maxRequestsPerChild=909
+'''
+
+In YAML:
+
+'''
+atlanta:
+  host1:
+    http_port: 80
+    maxRequestsPerChild: 808
+  host2:
+    http_port: 303
+    maxRequestsPerChild: 909
+'''
+
+#### Group variables
+
+If all hosts in a group share a variable value, you can apply that variable to an entire group at once. In INI:
+
+'''
+[atlanta]
+host1
+host2
+
+[atlanta:vars]
+ntp_server=ntp.atlanta.example.com
+proxy=proxy.atlanta.example.com
+'''
+
+In YAML:
+
+'''
+atlanta:
+  hosts:
+    host1:
+    host2:
+  vars:
+    ntp_server: ntp.atlanta.example.com
+    proxy: proxy.atlanta.example.com
+'''
+
+We are defining variables in host_vars/ and group_vars/ folders. The files containing variables are named after hosts and groups names. You can also add group_vars/ and host_vars/ directories to your playbook directory. The ansible-playbook command looks for these directories in the current working directory by default.
+
+
 ## Configure managed nodes
 
 Run a command on all nodes:
@@ -113,6 +168,9 @@ We copy the vimrc file to all managed nodes using ansible copy module:
     ansible all -m copy -a 'src=../util/etc/vim/vimrc dest=/etc/ owner=root group=root mode=0644' -b
 
 The -b option (see <http://docs.ansible.com/ansible/latest/become.html>) causes the remote task to use privilege escalation (i.e. sudo) which is required to copy files into the /etc directory
+
+Gathering facts about a host:
+    ansible tb-h1 -m setup
 
 ## Playbook
 
