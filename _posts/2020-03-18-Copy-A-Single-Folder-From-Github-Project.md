@@ -26,7 +26,7 @@ We want the pull-48870 which is in 'branches' folder by simply replace 'tree' in
 
 Use export if we don't want to track the branch (it's easy to change the code and forget we are pushing to the original repo while thinking we are pushing the parent folder to our repo!):
 
-    svn checkout https://github.com/softagram/ansible/branches/pull-48870/lib/ansible/modules/net_tools
+    svn export https://github.com/softagram/ansible/branches/pull-48870/lib/ansible/modules/net_tools
 
 That's it.
 
