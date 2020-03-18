@@ -206,6 +206,8 @@ Storage Network
 
 We will configure the OpenStack infrastructure node according to the table above.
 
+This step requires some fix to current ansbile nmcli module. The problem is desribed [here](https://github.com/softagram/ansible/pull/11). It is fixed temporarily until the code is merged by placing the modified nmcli module in local ansible library folder as described [here](https://docs.ansible.com/ansible/latest/dev_guide/developing_locally.html). Following the documentation, we will make the module available locally for our playbooks by storing it in a sub-directory called 'library' in the directory that contains the playbook(s).
+
 #### Setup bonding
 
 Variables

@@ -3,7 +3,7 @@ layout: post
 title: Howto copy a single folder from a github branch
 categories: [blog, howto]
 tags: [trick, github]
-comments:true
+comments: true
 #series: "Cloud lab with OpenStack"
 ---
 

@@ -1,8 +1,10 @@
 ---
 layout: post
-title: Markdown Style Guide
+title: post template 
 categories: [blog, howto]
-tags: [hot, summer]
+tags: [trick, github]
+comments: true
+#series: "Cloud lab with OpenStack"
 ---
 
 This is a demo of all styled elements in Jekyll Now.
