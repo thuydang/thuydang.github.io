@@ -204,9 +204,75 @@ Storage Network
 
 **The Storage Network** provides segregated access to Block Storage from OpenStack services such as Cinder and Glance. The storage network uses a dedicated VLAN typically connected to the br-storage bridge.
 
-We will configure the OpenStack infrastructure node according to the table above.
+We will configure the OpenStack infrastructure node according to the table above. But before we need to fix current ansible nmcli module.
 
-This step requires some fix to current ansbile nmcli module. The problem is desribed [here](https://github.com/softagram/ansible/pull/11). It is fixed temporarily until the code is merged by placing the modified nmcli module in local ansible library folder as described [here](https://docs.ansible.com/ansible/latest/dev_guide/developing_locally.html). Following the documentation, we will make the module available locally for our playbooks by storing it in a sub-directory called 'library' in the directory that contains the playbook(s).
+#### Custome ansible module
+
+Current ansible v2.9 does not show our library folder in the list of module paths, e.g.:
+
+    /opt/ansible-runtime/lib/python3.7/site-packages/ansible/modules/net_tools/nmcli.py
+
+The folder is created by OpenStack ansible, which also wraps all call to `ansible` and `ansible-playbook` with a python virtualenv using the lib above. So we have to add the path in the `ansible.cfg` manually:
+'''
+[defaults]
+inventory = ./hosts
+library = ./playbooks/library
+'''
+
+Download custom_module module from ansible devel:
+
+    svn export https://github.com/ansible/ansible/trunk/lib/ansible/modules/net_tools
+
+To confirm that custom_ module is available:
+
+    ansible-doc -t module custom_module. 
+
+    ansible-doc -t module custom_module. 
+    > NMCLI    (/home/dang/workspace/home-lab/ansible/playbooks/library/custome_module.py)
+
+#### Prepare nmcli module for ansible version 2.9
+In this step we will get the latest ansible modules, apply patch for some error and install ansible to avoid any error.
+
+Get latest ansible (devel) in `/opt`:
+
+    git clone https://github.com/ansible/ansible.git
+
+Apply and merge latest pull requests required. We will fix nmcli module for creating bond slaves as an example. The list of required PR to be merged for this OpenStack setup is provided later.
+
+##### Merging PR Modifying bond and team slaves 
+
+Fixed by pull request [#59234](https://github.com/ansible/ansible/pull/59234). 
+
+The patch is applied for previous fork of ansible, which is hundred of commits behind. So we will fetch it in a separate branch and merge with latest code base.
+
+Fetch the PR to a branch `pr59234`:
+
+    git fetch origin refs/pull/59234/head:pr59234
+
+Now we can diff against the pull-requested commits, log them, cherry-pick them, or just merge them outright.
+
+    git checkout devel
+    git merge pr59234
+
+We can install the patched ansible to OpenStack `/opt/ansible-runtime/lib/python3.7/site-packages/`:
+
+    pip3 install ./ -t /opt/ansible-runtime/lib/python3.7/site-packages/
+    WARNING: Target directory /opt/ansible-runtime/lib/python3.7/site-packages/ansible already exists. Specify --upgrade to force replacement.
+
+Pip will search for setup.py in current folder and install the python module ansible to the folder specified by `-t`.
+
+Other problems and PRs:
+
+* nmcli can not create bridge
+* Depricated NetworkManager-glib described [here](https://github.com/softagram/ansible/pull/11). 
+
+
+##### Workaround for nmcli bridge with templates 
+
+TODO Describe below.
+
+#### Setup bridge
+TODO
 
 #### Setup bonding
 
@@ -230,5 +296,5 @@ Defining the first tasks:
 ### Bonding
 
 * <https://linuxconfig.org/how-to-configure-network-interface-bonding-on-red-hat-enterprise-linux-8>
-* 
+* <https://devops.ionos.com/tools/ansible/>
 ----

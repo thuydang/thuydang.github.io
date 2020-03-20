@@ -216,4 +216,5 @@ Similar to a shell script, you can make your Ansible playbook executable and add
 1. <https://www.redhat.com/en/blog/system-administrators-guide-getting-started-ansible-fast?extIdCarryOver=true&sc_cid=701f2000001OH7YAAW>
 2. <https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#non-ssh-connection-types>
 3. <https://docs.ansible.com/ansible/latest/user_guide/playbooks_intro.html#hosts-and-users>
+4. <https://docs.ansible.com/ansible/devel/user_guide/sample_setup.html#using-local-ansible-modules>
 ----
