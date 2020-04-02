@@ -1,0 +1,15 @@
+---
+layout: post
+title: DBUS
+categories: [draft, blog, howto]
+tags: [draft, lab]
+comments: true
+#series: "Cloud lab with OpenStack"
+---
+
+<https://www.linuxjournal.com/article/10455>
+<https://unix.stackexchange.com/a/106900/401061>
+
+For CentOS 7, install infrastructure server instead of minimal. systemd-logind config seems to work with infrastructure server but not with the minimal setup.
+
+

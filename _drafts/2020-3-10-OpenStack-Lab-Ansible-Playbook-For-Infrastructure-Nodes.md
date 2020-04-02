@@ -1,6 +1,6 @@
 ---
 layout: post
-title: OpenStack lab Ansible playbooks
+title: OpenStack lab configure OpenStack deployment
 categories: [blog, howto]
 tags: [lab, ansible]
 comments:true
@@ -9,292 +9,327 @@ series: "Cloud lab with OpenStack"
 
 In this series we will walk through the setup of a small OpenStack lab.
 
-In the previos article we learned the basic of Ansible. In this article we will setup OpenStack infrastructure node using Ansible playbook.
+In the previous article, we setup OpenStack infrastructure nodes using Ansible playbook. In this article, we will configure the OpenStack ansible playbook for installing OpenSack in our environment.
 
-## OpenStack installation methods
+Before you can run the OpenStack Ansible playbooks, modify these files to define the target environment. Configuration tasks include:
 
-1. **Manual installation:** necessary components are installed and configured on infrastructure nodes one by one. Reading the [doc](https://docs.openstack.org/install-guide/preface.html?_ga=2.124152911.456247285.1583840855-1032011055.1582493996#red-hat-enterprise-linux-and-centos) will provide useful information and concepts before using the following methods, which utilize automated installation tools.
-2. **Using deployment tools:** many tools are developed for the ease of OpenStack installation on baremetals or containers. Some of them are listed on OpenStack website [link](https://www.openstack.org/software/project-navigator/deployment-tools), e.g., openstack-helm, kolla-ansible, openstack-ansible, kayobe, openstack-chef, devstack, etc. Some aspect maybe considered when choosing deployment methods:
-* _Testing vs. production:_ for short-term setup for demo or development (fix bugs), simple and automated methods are good choices, e.g., devstack.
-* _Update requirements:_ production systems require frequent updates of the node OSs and OpenStack versions for latest security patches or new OpenStack features. Depending on the capability of operation teams, i.e., comfortable with handling OS updates than OpenStack ones or frequent OpenStack upgrade not required, certain level of isolation between OpenStack deployment and infrastructure node OSs, e.g., containerized deployment, maybe useful. Relevant methods are openstack-helm, kolla-ansible.
-* _OpenStack super user:_ Staying at the edge with latest OSs and OpenStack versions. OpenStack is deployed on baremetal or infrastructure nodes. Automation tools still provide advantages, such as documented installation step for quick rollback, repeated or incremental deployment, etc. Operation teams are expected to be absolute experts!.
+* Target host networking to define bridge interfaces and networks.
 
-We will try out [openstack-ansible](https://www.openstack.org/software/releases/train/components/openstack-ansible), which are ansible playbooks to deploy OpenStack. We will customize the playbook for our infrastructure. The fact that this method is described here means we are successful with it!.
+* A list of target hosts on which to install the software.
 
-We follow the openstack-ansible [doc](https://docs.openstack.org/project-deploy-guide/openstack-ansible/train/) for OpenStack Train from now on.
+* Virtual and physical network relationships for OpenStack Networking (neutron).
 
-## OpenStack lab infrastructure description
+* Passwords for all services.
 
-* 2 nodes: controller & compute.
-* 1 deployment host, which is ansible control node.
-* network TODO
+## Configure deployment 
 
+### Initial environment configuration
 
-## Preparing deployment host
+OpenStack-Ansible (OSA) depends on various files that are used to build an inventory for Ansible. Perform the following configuration on the deployment host.
 
-The playbooks for our home-lab is located in `ansible/playbooks/home-lab.yaml`.
+1 .Copy the contents of the /opt/openstack-ansible/etc/openstack_deploy directory to the /etc/openstack_deploy directory.
 
-### Install packages
+2. Change to the /etc/openstack_deploy directory.
 
-    dnf install lxc
-    pip install virtualenv
+3. Copy the openstack_user_config.yml.example file to /etc/openstack_deploy/openstack_user_config.yml.
 
-    systemctl stop firewalld
-    systemctl mask firewalld
+4. Review the openstack_user_config.yml file and make changes to the deployment of your OpenStack environment.
 
-### Configure network
+5. Review the user_variables.yml file to configure global and role specific deployment options. The file contains some example variables and comments but you can get the full list of variables in each role’s specific documentation.
 
-#### Enable 802.1q vlan tagging:
+The install_method variable is set during the initial deployment to source based or distro based and you must not change it as OpenStack-Ansible is not able to convert itself from one installation method to the other.
 
-Ensure that the module is loaded by entering the following command:
-    lsmod | grep 8021q
+### Hosts and services configuration
 
-If the module is not loaded, load it with the following command:
-    modprobe 8021q
-
-#### Connect deployment host
-
-Connect deployment host with the management network over 'br-mgmt', i.e., 172.29.236.0/22, and 'vlan10', e.g., ethX.10. 
-
-Configure your physical interface in /etc/sysconfig/network-scripts/ifcfg-ethX, where X is a unique number corresponding to a specific interface, as follows:
-'''
-DEVICE=ethX
-TYPE=Ethernet
-BOOTPROTO=none
-ONBOOT=yes
-'''
-
-Configure the VLAN interface configuration in /etc/sysconfig/network-scripts. The configuration filename should be the physical interface plus a . character plus the VLAN ID number. For example, if the VLAN ID is 192, and the physical interface is eth0, then the configuration filename should be ifcfg-eth0.192:
-'''
-BOOTPROTO=none
-DEVICE=ethX.10
-TYPE=Ethernet
-ONBOOT=yes
-USERCTL=no
-VLAN=yes
-BRIDGE=br-mgmt
-'''
-
-If there is a need to configure a second VLAN, with for example, VLAN ID 193, on the same interface, eth0 , add a new file with the name eth0.193 with the VLAN configuration details.
-
-
-Setup br-mgmt in '/etc/sysconfig/network-scripts/ifcfg-br-mgmt':
+We configure the openstack_user_config.yml
 
 '''
-DEVICE=br-mgmt
-TYPE=Bridge
-IPADDR=172.29.236.1
-NETMASK=255.255.252.0
-NETWORK=172.29.236.0
-ONBOOT=yes
-BOOTPROTO=none
+22 # https://ask.openstack.org/en/question/104307/openstack-ansible-pip-issues-while-installing-the-infrastructure/?a    nswer=112075#post-id-112075
+ 23 # FYI, when you have multiple haproxy_hosts configured in your openstack_user_config, you have to configure keepal    ived information. That keepalived information will be used to determine which VIP will be used on which NIC.
+ 24 #
+ 25 # Those VIPs can then be used in openstack-ansible, for example, by giving the dns name matching each VIP address     in the openstack_user_config under the internal lb vip address / external lb vip address configuration keys. Inter    nal and external LB VIP addresses should be different, and if possible (depends on your architecture configuration    ), it would be even better if they are on different NICs/networks.
+ 26 #
+ 27 # These lb vip addresses IPs should be reserved (still in openstack_user_config under used_ips), to make sure no c    ontainer takes it.
+ 28
+ 29 used_ips:
+ 30   - "172.29.236.1,172.29.236.5"
+ 31   - "172.29.240.1,172.29.240.5"
+ 32   - "172.29.244.1,172.29.244.5"
+ 33
+ 34 global_overrides:
+ 35   # External LB VIP should be in different subnet.
+ 36   #external_lb_vip_address: 172.29.236.10
+ 37   # Take reserved ip to make sure no container uses it.
+ 38   internal_lb_vip_address: 172.29.236.5
 '''
 
+#### HAproxy configuration
 
+When using keepalive. 
 
+<https://docs.openstack.org/openstack-ansible/mitaka/install-guide/configure-haproxy.html>
 
-Restart the networking service, in order for the changes to take effect by running as root:
-    systemctl restart network.service
-or 
-    systemctl restart NetworkManager.service
+To make keepalived work, edit at least the following variables in user_variables.yml:
 
-
-
-### Install OpenStack deployment nodes.
-
-    git clone -b 20.0.0 https://opendev.org/openstack/openstack-ansible /opt/openstack-ansible
-
-If opendev.org can not be accessed to run git clone, github.com can be used as an alternative repo:
-
-    git clone -b 20.0.0 https://github.com/openstack/openstack-ansible.git /opt/openstack-ansible
-
-Change to the /opt/openstack-ansible directory, and run the Ansible bootstrap script:
-
-    scripts/bootstrap-ansible.sh
-
-
-## Prepare infrastructure/OpenStack nodes
-
-### Upload root keys from existing keys
-We will copy keys from the keys folders to control host and managed hosts (OpenStack infrastructure nodes)' /root/.ssh/. This is required to install OpenStack nodes. Run the playbook with sudo to access control host's (ansible localhost) /root folder. 
-    sudo ansible-playbook   playbooks/home-lab.yaml -vvvvv
-
-### Install packages
-* Disable selinux. Edit /etc/sysconfig/selinux, make sure that SELINUX=enforcing is changed to SELINUX=disabled.
-    setenforce 0
-
-* Install packages
-    ansible all -b -m shell -a "dnf install -y bridge-utils iputils lsof lvm2 chrony openssh-server sudo tcpdump python"
-
-* Enable bonding:
-    ansible all -b -m shell -a "echo 'bonding' >> /etc/modules-load.d/openstack-ansible.conf"
-    tb-h1 | CHANGED | rc=0 >>
-    tb-h2 | CHANGED | rc=0 >>
-
-    ansible all -b -m shell -a "echo '8021q' >> /etc/modules-load.d/openstack-ansible.conf"
-
-    ansible all -b -m shell -a "systemctl enable chronyd.service"
-    ansible all -b -m shell -a "systemctl start chronyd.service"
-
-### Setup storage on controller node
-
-**Note** OpenStack-Ansible automatically configures LVM on the nodes, and overrides any existing LVM configuration. If you had a customized LVM configuration, edit the generated configuration file as needed.
-
-To use the optional Block Storage (cinder) service, create an LVM volume group named cinder-volumes on the storage host. Specify a metadata size of 2048 when creating the physical volume. For example:
-
-    pvcreate --metadatasize 2048 physical_volume_device_path
-    vgcreate cinder-volumes physical_volume_device_path
-
-Optionally, create an LVM volume group named lxc for container file systems if you want to use LXC with LVM. If the lxc volume group does not exist, containers are automatically installed on the file system under /var/lib/lxc by default.
-
-### Configuring the network
-
-OpenStack-Ansible uses bridges to connect physical and logical network interfaces on the host to virtual network interfaces within containers. Target hosts need to be configured with the following network bridges:
-
-|    Bridge name   |    Best configured on   |     With a static IP    |  
-|------------------|-------------------------|-------------------------|
-| br-mgmt          | On every node           |    Always               |
-|------------------|-------------------------|-------------------------|
-| br-storage       | On every storage node   | When component is deployed on metal |
-|                  |-------------------------|-------------------------|
-|                  | On every compute node   |Always                   |
-|------------------|-------------------------|-------------------------|
-| br-vxlan         | On every network node   | When component is deployed on metal |
-|                  | On every compute node   | Always                  |
-|------------------|-------------------------|-------------------------|
-| br-vlan          | On every network node   | Never                   |
-|                  | On every compute node   | Never                   |
-|------------------|-------------------------|-------------------------|
-
-For a detailed reference of how the host and container networking is implemented, refer to [OpenStack-Ansible Reference Architecture, section Container Networking](https://docs.openstack.org/openstack-ansible/train/reference/architecture/index.html).
-
-For use case examples, refer to [User Guides](https://docs.openstack.org/openstack-ansible/train/user/index.html).
-
-We are using **single bonding** configuration described [here](https://docs.openstack.org/openstack-ansible/train/user/network-arch/example.html).
-
-We will use following networks
-
-Network
-
-CIDR
-
-VLAN
-
-Management Network
-
-172.29.236.0/22
-
-10
-
-Overlay Network
-
-172.29.240.0/22
-
-30
-
-Storage Network
-
-172.29.244.0/22
-
-20
-
-**The Management Network**, also referred to as the container network, provides management of and communication between the infrastructure and OpenStack services running in containers or on metal. The management network uses a dedicated VLAN typically connected to the br-mgmt bridge, and may also be used as the primary interface used to interact with the server via SSH.
-
-**The Overlay Network**, also referred to as the tunnel network, provides connectivity between hosts for the purpose of tunnelling encapsulated traffic using VXLAN, GENEVE, or other protocols. The overlay network uses a dedicated VLAN typically connected to the br-vxlan bridge.
-
-**The Storage Network** provides segregated access to Block Storage from OpenStack services such as Cinder and Glance. The storage network uses a dedicated VLAN typically connected to the br-storage bridge.
-
-We will configure the OpenStack infrastructure node according to the table above. But before we need to fix current ansible nmcli module.
-
-#### Custome ansible module
-
-Current ansible v2.9 does not show our library folder in the list of module paths, e.g.:
-
-    /opt/ansible-runtime/lib/python3.7/site-packages/ansible/modules/net_tools/nmcli.py
-
-The folder is created by OpenStack ansible, which also wraps all call to `ansible` and `ansible-playbook` with a python virtualenv using the lib above. So we have to add the path in the `ansible.cfg` manually:
 '''
-[defaults]
-inventory = ./hosts
-library = ./playbooks/library
+haproxy_keepalived_external_vip_cidr: 192.168.0.4/25
+haproxy_keepalived_internal_vip_cidr: 172.29.236.54/16
+haproxy_keepalived_external_interface: br-flat
+haproxy_keepalived_internal_interface: br-mgmt
 '''
 
-Download custom_module module from ansible devel:
+haproxy_keepalived_internal_interface and haproxy_keepalived_external_interface represent the interfaces on the deployed node where the keepalived nodes bind the internal and external vip. By default, use br-mgmt.
+On the interface listed above, haproxy_keepalived_internal_vip_cidr and haproxy_keepalived_external_vip_cidr represent the internal and external (respectively) vips (with their prefix length).
+Set additional variables to adapt keepalived in your deployment. Refer to the user_variables.yml for more descriptions.
 
-    svn export https://github.com/ansible/ansible/trunk/lib/ansible/modules/net_tools
+<Book mastering openstack - khedher>
+More services can be added or customized by adjusting the haproxy_config.yml file. The
+user_variables.yml file can be also used to customize each HAProxy/Keepalived
+instance by setting the priority of the VRRP value. By default, the master node is assigned a
+value of 100 whereas the slave is assigned a value of 20. Setting the Keepalived
+configuration to use more than one backup node can be found in the
+/vars/configs/keepalived_haproxy.yml file. The default settings can be overwritten
+by setting priorities, for example, as follows:
 
-To confirm that custom_ module is available:
+    haproxy_keepalived_priority_master: 101
+    haproxy_keepalived_priority_backup: 99
 
-    ansible-doc -t module custom_module. 
+More additional settings can be configured to specify which interfaces on the cloud
+controller nodes Keepalived will bind both internal and external VIPs. The following
+excerpt sets the br-mgmt and enp0s3 as the internal and external Keepalived interfaces
+respectively in the user_variables.yml file:
 
-    ansible-doc -t module custom_module. 
-    > NMCLI    (/home/dang/workspace/home-lab/ansible/playbooks/library/custome_module.py)
+    haproxy_keepalived_internal_interface: br-mgmt
+    haproxy_keepalived_external_interface: enp0s3
 
-#### Prepare nmcli module for ansible version 2.9
-In this step we will get the latest ansible modules, apply patch for some error and install ansible to avoid any error.
+To install and update the HAProxy and Keepalived service configurations in the cloud
+controller nodes, run the haproxy-install.yml playbook as follows:
 
-Get latest ansible (devel) in `/opt`:
+    openstack-ansible haproxy-install.yml
 
-    git clone https://github.com/ansible/ansible.git
+The last piece of the HA setup from the playbooks is to update the OpenStack services by
+limiting the deployment of the updated nodes:
 
-Apply and merge latest pull requests required. We will fix nmcli module for creating bond slaves as an example. The list of required PR to be merged for this OpenStack setup is provided later.
+    openstack-ansible setup-openstack.yml --limit haproxy_hosts
 
-##### Merging PR Modifying bond and team slaves 
+### Installing additional services
+To install additional services, the files in etc/openstack_deploy/conf.d provide examples showing the correct host groups to use. To add another service, add the host group, allocate hosts to it, and then execute the playbooks.
 
-Fixed by pull request [#59234](https://github.com/ansible/ansible/pull/59234). 
+### Configuring service credentials
 
-The patch is applied for previous fork of ansible, which is hundred of commits behind. So we will fetch it in a separate branch and merge with latest code base.
+Configure credentials for each service in the /etc/openstack_deploy/user_secrets.yml file. Consider using the Ansible Vault feature to increase security by encrypting any files that contain credentials.
 
-Fetch the PR to a branch `pr59234`:
+Adjust permissions on these files to restrict access by non-privileged users.
 
-    git fetch origin refs/pull/59234/head:pr59234
+The keystone_auth_admin_password option configures the admin tenant password for both the OpenStack API and Dashboard access.
 
-Now we can diff against the pull-requested commits, log them, cherry-pick them, or just merge them outright.
+We recommend that you use the pw-token-gen.py script to generate random values for the variables in each file that contains service credentials:
 
-    git checkout devel
-    git merge pr59234
+    # cd /opt/openstack-ansible
+    # ./scripts/pw-token-gen.py --file /etc/openstack_deploy/user_secrets.yml
 
-We can install the patched ansible to OpenStack `/opt/ansible-runtime/lib/python3.7/site-packages/`:
-
-    pip3 install ./ -t /opt/ansible-runtime/lib/python3.7/site-packages/
-    WARNING: Target directory /opt/ansible-runtime/lib/python3.7/site-packages/ansible already exists. Specify --upgrade to force replacement.
-
-Pip will search for setup.py in current folder and install the python module ansible to the folder specified by `-t`.
-
-Other problems and PRs:
-
-* nmcli can not create bridge
-* Depricated NetworkManager-glib described [here](https://github.com/softagram/ansible/pull/11). 
-
-
-##### Workaround for nmcli bridge with templates 
-
-TODO Describe below.
-
-#### Setup bridge
-TODO
-
-#### Setup bonding
-
-Variables
+To regenerate existing passwords, add the --regen flag.
 
 
-----
+## Run OpenStack Ansible playbooks
 
-Defining the first tasks:
-```
----
-- hosts: all
-  tasks:
-    - name: list files in folder
-      command: ls
-```
+The installation process requires running three main playbooks:
+
+The setup-hosts.yml Ansible foundation playbook prepares the target hosts for infrastructure and OpenStack services, builds and restarts containers on target hosts, and installs common components into containers on target hosts.
+
+The setup-infrastructure.yml Ansible infrastructure playbook installs infrastructure services: Memcached, the repository server, Galera, RabbitMQ, and rsyslog.
+
+The setup-openstack.yml OpenStack playbook installs OpenStack services, including Identity (keystone), Image (glance), Block Storage (cinder), Compute (nova), Networking (neutron), etc.
+
+### Check the integrity of the configuration files.
+
+Ensure that all the files edited in the /etc/openstack_deploy directory are Ansible YAML compliant with the YAML Lint program.
+
+    cd /opt/openstack-ansible/playbooks directory
+    openstack-ansible setup-infrastructure.yml --syntax-check
+
+### Run the playbooks to install OpenStack¶
+    cd /opt/openstack-ansible/playbooks
+
+#### Run the host setup playbook:
+This playbook setups OpenStack infrastructure hosts, lxc containers on controller host, etc. Facts about deployed containers are updated in file `/etc/openstack_deploy/openstack_inventory.json`.
+
+Run playbook:
+
+    # openstack-ansible setup-hosts.yml
+
+Confirm satisfactory completion with zero items unreachable or failed:
+
+'''
+PLAY RECAP ********************************************************************
+...
+deployment_host                :  ok=18   changed=11   unreachable=0    failed=0
+'''
+
+#### Run the infrastructure setup playbook
+
+This playbook setups haproxy on controller host.
+
+    # openstack-ansible setup-infrastructure.yml
+
+Confirm satisfactory completion with zero items unreachable or failed:
+
+'''
+PLAY RECAP ********************************************************************
+...
+deployment_host                : ok=27   changed=0    unreachable=0    failed=0
+'''
+
+#### Run the following command to verify the database cluster:
+
+    # ansible galera_container -m shell \
+    -a "mysql -h localhost -e 'show status like \"%wsrep_cluster_%\";'"
+
+Example output:
+
+'''
+node3_galera_container-3ea2cbd3 | success | rc=0 >>
+Variable_name             Value
+wsrep_cluster_conf_id     17
+wsrep_cluster_size        3
+wsrep_cluster_state_uuid  338b06b0-2948-11e4-9d06-bef42f6c52f1
+wsrep_cluster_status      Primary
+
+node2_galera_container-49a47d25 | success | rc=0 >>
+Variable_name             Value
+wsrep_cluster_conf_id     17
+wsrep_cluster_size        3
+wsrep_cluster_state_uuid  338b06b0-2948-11e4-9d06-bef42f6c52f1
+wsrep_cluster_status      Primary
+
+node4_galera_container-76275635 | success | rc=0 >>
+Variable_name             Value
+wsrep_cluster_conf_id     17
+wsrep_cluster_size        3
+wsrep_cluster_state_uuid  338b06b0-2948-11e4-9d06-bef42f6c52f1
+wsrep_cluster_status      Primary
+'''
+
+The wsrep_cluster_size field indicates the number of nodes in the cluster and the wsrep_cluster_status field indicates primary.
+
+#### Run the OpenStack setup playbook:
+
+    # openstack-ansible setup-openstack.yml
+
+Confirm satisfactory completion with zero items unreachable or failed.
+
+#### Ansible facts caching
+
+Forcing regeneration of cached facts
+If a host’s kernel is upgraded or additional network interfaces or bridges are created on the host, its cached facts may be incorrect. This can lead to unexpected errors while running playbooks, and require that the cached facts be regenerated.
+
+Run the following command to remove all currently cached facts for all hosts:
+
+    rm /etc/openstack_deploy/ansible_facts/*
+
+#### Cleanup OSA up
+
+Removing lxc containers. For the sake of simplicity, id probably run the lxc-container-destroy.yml play. Or manually:
+    for i in `lxc-ls`; do lxc-destroy --name $i; done
+
+    rm /etc/openstack_deploy/openstack_hostnames_ips.yml
+    rm /etc/openstack_deploy/openstack_inventory.json
+    start the plays fresh
+
+#### Error installing keystone
+
+Log files dor each lxc container installation are placed in controller node:
+
+    controller1 admin]# ls /openstack/log/infra1_keystone_container-d2c70be4/
+    less python_env_build.log
+
+
+Failing task `Install python packages into the venv` in `/etc/ansible/roles/python_venv_build/tasks/python_venv_install.yml`
+'''
+FAILED - RETRYING: Install python packages into the venv (5 retries left).Result was: {
+    "attempts": 1,
+    "changed": false,
+    "cmd": [
+        "/openstack/venvs/keystone-20.0.0/bin/pip2",
+        "install",
+        "-U",
+        "--constraint",
+        "/openstack/venvs/keystone-20.0.0/global-constraints.txt",
+        "--constraint",
+        "/openstack/venvs/keystone-20.0.0/constraints.txt",
+        "--pre",
+        "--log",
+        "/var/log/python_venv_build.log",
+        "--find-links",
+        "http://172.29.236.100:8181/os-releases/20.0.0/centos-7.7-x86_64",
+        "--trusted-host",
+        "172.29.236.100",
+        "keystone",
+        "ldappool",
+        "osprofiler",
+        "PyMySQL",
+        "pyngus",
+        "python-memcached",
+        "python-openstackclient",
+        "systemd-python",
+        "uWSGI"
+    ],
+    "invocation": {
+        "module_args": {
+            "chdir": null,
+            "editable": false,
+            "executable": null,
+            "extra_args": "--constraint /openstack/venvs/keystone-20.0.0/global-constraints.txt --constraint /openstack/venvs/keystone-20.0.0/constraints.txt --pre --log /var/log/python_venv_build.log  --find-links http://172.29.236.100:8181/os-releases/20.0.0/centos-7.7-x86_64 --trusted-host 172.29.236.100 ",
+            "name": [
+                "keystone",
+                "ldappool",
+                "osprofiler",
+                "PyMySQL",
+                "pyngus",
+                "python-memcached",
+                "python-openstackclient",
+                "systemd-python",
+                "uWSGI"
+            ],
+            "requirements": null,
+            "state": "latest",
+            "umask": null,
+            "version": null,
+            "virtualenv": "/openstack/venvs/keystone-20.0.0",
+            "virtualenv_command": "virtualenv",
+            "virtualenv_python": null,
+            "virtualenv_site_packages": false
+        }
+    },
+
+}
+'''
+
+** Problem: ** 
+
+* requirement file is not recreated if the file is already exist. However, the file is corrupted in previous failed installation. Remove the file `/openstack/venvs/keystone-20.0.0/constraints.txt` inside lxc container:
+    ssh to infra node
+    lxc-ls
+    lxc-attache infra_container_name
+
+* haproxy does not start. Check kernel config and add net.ipv4.ip_nonlocal_bind=1 to /etc/sysctl.conf and running sysctl -p. Afterwards check if haproxy can bind port 
+    
+     ss --listening -n. 
+     journal -u haproxy.service
+
+'''
+sing module file /opt/ansible-runtime/lib/python3.7/site-packages/ansible/modules/packaging/language/pip.py
+Pipelining is enabled.
+container_name: "infra1_keystone_container-d2c70be4"
+physical_host: "infra1"
+Container confirmed
+Container type "lxc"
+<172.29.236.2> ESTABLISH SSH CONNECTION FOR USER: root
+<172.29.236.2> SSH: EXEC ssh -vvv -C -o ControlMaster=auto -o ControlPersist=60s -o StrictHostKeyChecking=no -o KbdInteractiveAuthentication=no -o PreferredAuthentications=gssapi-with-mic,gssapi-keyex,hostbased,publickey -o PasswordAuthentication=no -o 'User="root"' -o ConnectTimeout=5 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ServerAliveInterval=64 -o ServerAliveCountMax=1024 -o Compression=no -o TCPKeepAlive=yes -o VerifyHostKeyDNS=no -o ForwardX11=no -o ForwardAgent=yes -T -o ControlPath=/root/.ansible/cp/fe6de89993 172.29.236.2 'lxc-attach --clear-env --name infra1_keystone_container-d2c70be4 -- su - root -c '"'"'/bin/sh -c '"'"'"'"'"'"'"'"'/usr/bin/python && sleep 0'"'"'"'"'"'"'"'"''"'"''
+'''
+
 
 ## References
-1. <https://docs.ansible.com/ansible/latest/user_guide/playbooks_intro.html#hosts-and-users>
 
-### Bonding
 
-* <https://linuxconfig.org/how-to-configure-network-interface-bonding-on-red-hat-enterprise-linux-8>
-* <https://devops.ionos.com/tools/ansible/>
 ----

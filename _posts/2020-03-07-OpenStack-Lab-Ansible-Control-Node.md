@@ -73,14 +73,14 @@ As configured the host inventory file is `hosts` located in the same folder as t
 
 ```
 [all]
-tb-h1		ansible_host=192.168.0.114 ansible_user=admin ansible_ssh_private_key_file=../keys/id_rsa
-tb-h2		ansible_host=192.168.0.113 ansible_user=admin ansible_ssh_private_key_file=../keys/id_rsa
+compute1		ansible_host=192.168.0.114 ansible_user=admin ansible_ssh_private_key_file=../keys/id_rsa
+controller1		ansible_host=192.168.0.113 ansible_user=admin ansible_ssh_private_key_file=../keys/id_rsa
 
 [controllers]
-tb-h1
+controller1
 
 [computes]
-tb-h2
+compute1
 ```
 We specify username and ssh private keys to access the remote hosts. If sudo password is required, it must be set with `ansible_become_password` parameter. More options [here](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#non-ssh-connection-types).
 
