@@ -50,7 +50,7 @@ Use:
     </div>
 
     
-This is annoying for me too because I want to just copy html code without having to change css class name declaration!. If I find a better way, this will disappear from the post!. If you get over it for now run the bundling and server from the project's folder and see your front-end:
+This is annoying for me too because I want to just copy html code without having to change css class name declaration!. If I find a better way, [like this one](https://github.com/css-modules/css-modules/issues/31#issuecomment-276836876), this will disappear from the post!. If you get over it for now run the bundling and server from the project's folder and see your front-end:
 
     npm install
     gulp
@@ -90,6 +90,7 @@ Or to install everything in _package.json_:
     function build_dev(){
       return rollup.rollup({
         input: `${paths.src}/index.js`,
+        // watch: {chokidar: {...}} // not working for me using gulp watch below.
         plugins: [
           // Set env to compile React for dev or prod. Required by React.
           replace({
@@ -183,7 +184,7 @@ Or to install everything in _package.json_:
       //watch(`${paths.sass}/*.scss`, styles)
       //watch(`${paths.css}/*.css`, styles)
       watch(`${paths.public}/**/*.html`).on("change", reload)
-      watch([`${paths.js}/*.js`, `${paths.css}/*.css`, `!${paths.js}/*.min.js`], build_dev).on("change", reload)
+      watch([`${paths.components}/**/*.js`, `${paths.components}/**/*.css`, `${paths.css}/*.css`, `!${paths.js}/*.min.js`], build_dev).on("change", reload)
     }
     
 #### Defining task execution sequence
