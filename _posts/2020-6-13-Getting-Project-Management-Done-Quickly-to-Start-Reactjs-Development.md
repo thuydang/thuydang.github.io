@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Getting project bundling quickly to start Reactjs development
+title: Getting project bundling done quickly to start Reactjs development
 categories: [blog, howto, frontend]
 tags: [tutorial, frontend, beginner]
 comments: true
@@ -23,6 +23,7 @@ Other added or useful features coming from the selected tools:
 Clone this [repo](https://github.com/thuydang/gulp_rollup_react) and start coding Reactjs. Because of the _postcss-modules_ plugin, `Classname` attributes are declared differently.
 
 Instead of:
+```
     import React from "react";
     import style from "./panel.css";
     const Panel = () => {
@@ -34,6 +35,7 @@ Instead of:
     }
     export default Panel; 
 
+```
 Use:
 
     <!-- container is a class from a globle css (import from index.html) -->
