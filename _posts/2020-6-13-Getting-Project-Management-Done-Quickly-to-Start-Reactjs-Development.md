@@ -50,7 +50,7 @@ Use:
     </div>
 
     
-This is annoying for me too because I want to just copy html code without having to change css class name declaration!. If I find a better way, this will disappear from the post!. If you get over it for now run the bundling and server from the project's folder and see your front-end:
+This is annoying for me too because I want to just copy html code without having to change css class name declaration!. If I find a better way, [like this one](https://github.com/css-modules/css-modules/issues/31#issuecomment-276836876), this will disappear from the post!. If you get over it for now run the bundling and server from the project's folder and see your front-end:
 
     npm install
     gulp
