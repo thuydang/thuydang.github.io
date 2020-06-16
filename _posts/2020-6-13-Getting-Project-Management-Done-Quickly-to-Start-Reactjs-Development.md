@@ -49,9 +49,11 @@ Use:
     <div className={cn(style.panel, style.panelDefault, container)}>
     </div>
 
-A simpler way to declare css classes is simply change the _classname_ attribute to _stylename_, which is processed by the _react-css-modules_ plugin.
+Another simpler way to declare css classes is simply change the _classname_ attribute to _stylename_, which is processed by the _react-css-modules_ plugin.
     
 #This is annoying for me too because I want to just copy html code without having to change css class name declaration!. If I find a better way, [like this one](https://github.com/css-modules/css-modules/issues/31#issuecomment-276836876), this will disappear from the post!. If you get over it for now run the bundling and server from the project's folder and see your front-end:
+
+Now run the bundling and server from the project's folder and see your front-end:
 
     npm install
     gulp
