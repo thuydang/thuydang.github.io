@@ -269,6 +269,100 @@ title={item.description}
 
 ```
 
+### Global CSS for 3rd party components
+
+The combination of react, postcss-(modules) cause some CSS rendering problem with 3rd party components such as reactstrap.
+
+Reacstrap does not include bootstrap CSS but assumes bootstrap CSS is imported by the html. Postcss-modules anonymize imported bootstrap classes, hence changing the original class names. As the result, reactstrap components, e.g., modal, are not styled.
+
+A solution is described [here](https://github.com/reactstrap/reactstrap/issues/849). Reactstrap allows declaration of global css library with _Util_ module.
+
+Example of using bootstrap as global style for reactstrap's Modal component:
+
+``` javascript
+// src/components/Modal.js 
+import React, { Component } from "react";
+import bootstrap from 'bootstrap/dist/css/bootstrap.css';
+import {
+  Button,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Form,
+  FormGroup,
+  Input,
+  Label,
+  Util // https://github.com/reactstrap/reactstrap/issues/849
+} from "reactstrap";
+
+export default class CustomModal extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      activeItem: this.props.activeItem
+    };
+  }
+  handleChange = e => {
+    let { name, value } = e.target;
+    if (e.target.type === "checkbox") {
+      value = e.target.checked;
+    }
+    const activeItem = { ...this.state.activeItem, [name]: value };
+    this.setState({ activeItem });
+  };
+  render() {
+    const { toggle, onSave } = this.props;
+    Util.setGlobalCssModule(bootstrap);
+    return (
+      <Modal isOpen={true} toggle={toggle}>
+        <ModalHeader toggle={toggle}> Todo Item </ModalHeader>
+        <ModalBody>
+          <Form>
+            <FormGroup>
+              <Label for="title">Title</Label>
+              <Input
+                type="text"
+                name="title"
+                value={this.state.activeItem.title}
+                onChange={this.handleChange}
+                placeholder="Enter Todo Title"
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label for="description">Description</Label>
+              <Input
+                type="text"
+                name="description"
+                value={this.state.activeItem.description}
+                onChange={this.handleChange}
+                placeholder="Enter Todo description"
+              />
+            </FormGroup>
+            <FormGroup check>
+              <Label for="completed">
+                <Input
+                  type="checkbox"
+                  name="completed"
+                  checked={this.state.activeItem.completed}
+                  onChange={this.handleChange}
+                />
+                Completed
+              </Label>
+            </FormGroup>
+          </Form>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="success" onClick={() => onSave(this.state.activeItem)}>
+            Save
+          </Button>
+        </ModalFooter>
+      </Modal>
+    );
+  }
+}
+```
+
 
 ## References to useful articles
 
