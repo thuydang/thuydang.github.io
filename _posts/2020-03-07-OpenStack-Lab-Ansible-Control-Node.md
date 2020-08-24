@@ -164,14 +164,17 @@ We are defining variables in host_vars/ and group_vars/ folders. The files conta
 ## Configure managed nodes
 
 Run a command on all nodes:
-    $ ansible -m command -a "ls" all
+
+    ansible -m command -a "ls" all
 
 We copy the vimrc file to all managed nodes using ansible copy module:
+
     ansible all -m copy -a 'src=../util/etc/vim/vimrc dest=/etc/ owner=root group=root mode=0644' -b
 
 The -b option (see <http://docs.ansible.com/ansible/latest/become.html>) causes the remote task to use privilege escalation (i.e. sudo) which is required to copy files into the /etc directory
 
 Gathering facts about a host:
+
     ansible tb-h1 -m setup
 
 ## Playbook
