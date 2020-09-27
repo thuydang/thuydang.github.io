@@ -60,7 +60,31 @@ If I start the second distribution, I will be logged in as a root account:
 
 By unregistering the distribution like wsl --unregister Ubuntu-20.04 it will delete the associated ext4.vhdx file.
 
+## Using linux commands in Windows folder
+
+Run Linux binaries from the Windows Command Prompt (CMD) or PowerShell using wsl <command> (or wsl.exe <command>).
+
+For example:
+
+    C:\temp> wsl ls -la
+    <- contents of C:\temp ->
+
+Binaries invoked in this way:
+
+* Use the same working directory as the current CMD or PowerShell prompt.
+* Run as the WSL default user.
+* Have the same Windows administrative rights as the calling process and terminal.
+
+The Linux command following wsl (or wsl.exe) is handled like any command run in WSL. Things such as sudo, piping, and file redirection work.
+
+Example using sudo to update your default Linux distribution:
+
+    C:\temp> wsl sudo apt-get update
+
+[More tricks](https://docs.microsoft.com/en-us/windows/wsl/interop).
+
+
 ## References
 * https://dev.to/milolav/manually-installing-wsl2-distributions-41b4
 * https://github.com/yuk7/wsldl
-* 
+* https://docs.microsoft.com/en-us/windows/wsl/interop
