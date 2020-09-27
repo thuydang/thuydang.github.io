@@ -56,9 +56,21 @@ This will create a folder Ubuntu-New folder in the E:\WSL2 and the ext4.vhdx fil
 
 If I start the second distribution, I will be logged in as a root account:
     PS E:\Temp> wsl -d Ubuntu-Copy
-    root@mypc:/mnt/e/Temp#
+    root@mDESKTOP-V38C2TR:/mnt/e/Temp#
 
 By unregistering the distribution like wsl --unregister Ubuntu-20.04 it will delete the associated ext4.vhdx file.
+
+## Change default user when starting wsl distro
+
+Create and edit /etc/wsl.conf:
+
+    [user]
+    default=<string>
+
+Restart wsl distro
+    wsl --shutdown
+    wsl
+    [td@DESKTOP-V38C2TR Thuy Dang]$
 
 ## Using linux commands in Windows folder
 
