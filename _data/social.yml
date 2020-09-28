@@ -1,0 +1,39 @@
+# Icons on the footer
+rss: true         # Make sure you created a feed.xml with feed.xml layout
+behance:
+bitbucket:
+dribbble:
+facebook:
+flickr:
+gitlab:
+instagram:
+keybase:
+linkedin: https://www.linkedin.com/in/xtdang/        # Full URL
+pinterest:
+reddit:
+soundcloud:
+stack_overflow:
+stack_exchange:   # Full URL
+steam:
+tumblr:
+twitter: thuydang         # "twitter username"
+vimeo:
+wordpress:
+email_address: thuydang.de@gmail.com   # Full email address, e.g. "sam@example.com"
+github: thuydang
+stackoverflow: # your stackoverflow profile, e.g. "users/50476/bart-kiers"
+youtube: # channel/<your_long_string> or user/<user-name>
+googleplus: # anything in your profile username that comes after plus.google.com/
+
+
+# Share button options
+share:
+  facebook: true
+  twitter: true
+  tumblr:
+  pinterest:
+  pocket:
+  reddit: true
+  linkedin:
+  wordpress:
+  email: true
