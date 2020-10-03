@@ -68,6 +68,7 @@ Create and edit /etc/wsl.conf:
     default=<string>
 
 Restart wsl distro
+
     wsl --shutdown
     wsl
     [td@DESKTOP-V38C2TR Thuy Dang]$
