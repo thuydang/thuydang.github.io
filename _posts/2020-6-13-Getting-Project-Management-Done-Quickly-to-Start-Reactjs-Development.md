@@ -20,7 +20,7 @@ Other added or useful features coming from the selected tools:
 
 ## TL;DR
 
-Clone this [repo](https://github.com/thuydang/gulp_rollup_react) and start coding Reactjs. Because of the _postcss-modules_ plugin, `Classname` attributes are declared differently.
+Clone this [repo](https://github.com/thuydang/gulp_rollup_react/tree/todo-app) and start coding Reactjs. Because of the _postcss-modules_ plugin, `Classname` attributes are declared differently.
 
 Instead of:
 ```
